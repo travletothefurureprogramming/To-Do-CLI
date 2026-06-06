@@ -1,5 +1,6 @@
 import json
 from rich.console import Console
+import os
 
 console = Console()
 
@@ -21,6 +22,23 @@ def create_task(title):
 
     with open("to_do.json", "w") as file:
         json.dump(current_data, file, indent=4) 
+
+def delete_task(title):
+    try:
+        with open("to_do.json", "r") as file:
+            current_data = json.load(file)
+    except (json.JSONDecodeError, FileNotFoundError):
+        console.print("[red]Error: No tasks found![/red]")
+        return
+
+    new_data = [task for task in current_data if task["title"] != title]
+
+    if len(new_data) < len(current_data):
+        with open("to_do.json", "w") as file:
+            json.dump(new_data, file, indent=4)
+        console.print(f"[green]Task '{title}' deleted successfully![/green]")
+    else:
+        console.print(f"[yellow]Task '{title}' not found.[/yellow]")
 
 
 def complete_task(title):
@@ -45,17 +63,21 @@ def complete_task(title):
         console.print(f"[green]Task '{title}' marked as complete![/green]")
     else:
         console.print(f"[yellow]Task '{title}' not found.[/yellow]")
-            
+
+def clear():
+    os.system('cls' if os.name == 'nt' else 'clear')   
 
 while True:
     console.print("\n[underline]1. Show tasks[/underline]")
     console.print("[underline]2. Create task[/underline]")
     console.print("[underline]3. Complete task[/underline]")
-    console.print("[red underline]4. Exit[/red underline]")
+    console.print("[red underline]4. Delete task[/red underline]")
+    console.print("[red underline]5. Clear Terminal[/red underline]")
+    console.print("[red underline]6. Exit[/red underline]")
 
     select = input("Select number: ")
 
-    if select == "4":
+    if select == "6":
         exit()
         
     elif select == "1":
@@ -76,3 +98,11 @@ while True:
     elif select == "3":
         title = input("Enter title: ")
         complete_task(title)
+
+    elif select == "4":
+        title = input("Enter title: ")
+        delete_task(title)
+    
+    elif select == "5":
+        clear()
+
