@@ -16,3 +16,5 @@ Open the .exe and you are ready to go!!!
 Here is the tool in action, showing how to view, add, and complete tasks seamlessly:
 
 <img width="1492" height="755" alt="Screenshot 2026-06-06 153448" src="https://github.com/user-attachments/assets/d75b8b54-3bf3-410a-91db-3c563c498e4c" />
+
+Find live demo [here](https://stardance.hackclub.com/projects/9648/devlogs/2976)
