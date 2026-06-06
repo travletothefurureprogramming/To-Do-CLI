@@ -1,5 +1,5 @@
 # TO DO LIST CLI
-## # Todo-CLI
+## Todo-CLI
 
 A minimalist, file-based command-line todo manager designed for developers who want to manage tasks without leaving the terminal.
 
