@@ -1,6 +1,10 @@
 [
     {
-        "title":"Programming",
-        "status":"complete"
+        "title": "Go to supermarket",
+        "status": "complete"
+    },
+    {
+        "title": "Buy milk",
+        "status": "uncomplete"
     }
 ]
