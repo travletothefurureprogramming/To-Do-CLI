@@ -5,7 +5,7 @@ A minimalist, file-based command-line todo manager designed for developers who w
 
 ## Install
 
-Go to [https://github.com/travletothefurureprogramming/To-Do-CLI/releases/tag/Release](https://github.com/travletothefurureprogramming/To-Do-CLI/releases/tag/Release)
+Go to [https://github.com/travletothefurureprogramming/To-Do-CLI/releases/tag/Release](https://github.com/travletothefurureprogramming/To-Do-CLI/releases/tag/Release) and download the .exe
 
 ## How to run
 
