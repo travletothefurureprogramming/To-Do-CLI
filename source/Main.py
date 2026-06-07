@@ -32,25 +32,23 @@ def show_tasks():
     tasks = load_tasks()
 
     if not tasks:
-        console.print("[yellow]Δεν υπάρχουν εργασίες στη λίστα![/yellow]")
+        console.print("[yellow]There are no tasks in the list![/yellow]")
         return
 
-    table = Table(title="📋 Η To-Do Λίστα Μου", title_style="bold magenta")
+    table = Table(title="📋 My To-Do List", title_style="bold magenta")
     table.add_column("ID", justify="center", style="cyan", no_wrap=True)
-    table.add_column("Τίτλος", style="white")
-    table.add_column("Κατάσταση", justify="center")
-    table.add_column("Ημερομηνία", justify="center")
-    table.add_column("Προτεραιότητα", justify="center")
-
-
+    table.add_column("Title", style="white")
+    table.add_column("Status", justify="center")
+    table.add_column("Date", justify="center")
+    table.add_column("Priority", justify="center")
 
     for idx, task in enumerate(tasks, start=1):
         status = (
-            "[green]✔ Ολοκληρώθηκε[/green]"
+            "[green]✔ Complete[/green]"
             if task["status"] == "complete"
-            else "[red]❌ Εκκρεμεί[/red]"
+            else "[red]❌ Pending[/red]"
         )
-        table.add_row(str(idx), task["title"], status, task["datetime"],task["priority"])
+        table.add_row(str(idx), task["title"], status, task["datetime"], task["priority"])
 
     console.print(table)
 
@@ -60,49 +58,48 @@ def show_uncompleted_tasks():
     tasks = load_tasks()
 
     if not tasks:
-        console.print("[yellow]Δεν υπάρχουν εργασίες στη λίστα![/yellow]")
+        console.print("[yellow]There are no tasks in the list![/yellow]")
         return
 
-    table = Table(title="📋 Η To-Do Λίστα Μου", title_style="bold magenta")
+    table = Table(title="📋 My To-Do List", title_style="bold magenta")
     table.add_column("ID", justify="center", style="cyan", no_wrap=True)
-    table.add_column("Τίτλος", style="white")
-    table.add_column("Κατάσταση", justify="center")
-    table.add_column("Ημερομηνία", justify="center")
-    table.add_column("Προτεραιότητα", justify="center")
-
-    
+    table.add_column("Title", style="white")
+    table.add_column("Status", justify="center")
+    table.add_column("Date", justify="center")
+    table.add_column("Priority", justify="center")
 
     for idx, task in enumerate(tasks, start=1):
         if task["status"] != "complete":
-         table.add_row(str(idx), task["title"], "[red]❌ Εκκρεμεί[/red]", task["datetime"], task["priority"])
-         count +=1
+            table.add_row(str(idx), task["title"], "[red]❌ Pending[/red]", task["datetime"], task["priority"])
+            count += 1
     
     if count >= 1:
-     console.print(table)
+        console.print(table)
     else:
-      console.print("[green]Όλλες οι εργασίες έχουν ολοκληρωθεί![/green]")
+        console.print("[green]All tasks have been completed![/green]")
+
 
 def clear_all_tasks():
-    with open("to_do.json","w",encoding="utf-8") as f:
-            json.dump([], f)
+    with open("to_do.json", "w", encoding="utf-8") as f:
+        json.dump([], f)
     
     console.print(
-                f"[green]Όλλες οι εργασίες έχουν διαγραφεί![/green]"
-            )
+        f"[green]All tasks have been deleted![/green]"
+    )
 
 
-def create_task(title,priority):
+def create_task(title, priority):
     tasks = load_tasks()
     if priority == "1":
-     priority = "Χαμηλή"
+        priority = "Low"
     elif priority == "2":
-     priority = "Μέτρια"
+        priority = "Medium"
     elif priority == "3":
-     priority = "Υψηλή"
-    tasks.append({"title": title, "status": "uncomplete", "datetime":datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),"priority":priority})
+        priority = "High"
+    tasks.append({"title": title, "status": "uncomplete", "datetime": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"), "priority": priority})
     save_tasks(tasks)
     console.print(
-        f"[green]✔ Η εργασία '{title}' δημιουργήθηκε με επιτυχία![/green]"
+        f"[green]✔ Task '{title}' was created successfully![/green]"
     )
 
 
@@ -114,12 +111,12 @@ def complete_task(task_id):
             tasks[idx]["status"] = "complete"
             save_tasks(tasks)
             console.print(
-                f"[green]✔ Η εργασία '{tasks[idx]['title']}' ολοκληρώθηκε![/green]"
+                f"[green]✔ Task '{tasks[idx]['title']}' completed![/green]"
             )
         else:
-            console.print("[red]Λάθος ID. Δεν βρέθηκε η εργασία.[/red]")
+            console.print("[red]Wrong ID. Task not found.[/red]")
     except ValueError:
-        console.print("[red]Παρακαλώ δώσε έναν έγκυρο αριθμό (ID).[/red]")
+        console.print("[red]Please enter a valid ID number.[/red]")
 
 
 def delete_task(task_id):
@@ -130,12 +127,12 @@ def delete_task(task_id):
             removed = tasks.pop(idx)
             save_tasks(tasks)
             console.print(
-                f"[green]🗑 Η εργασία '{removed['title']}' διαγράφηκε![/green]"
+                f"[green]🗑 Task '{removed['title']}' was deleted![/green]"
             )
         else:
-            console.print("[red]Λάθος ID. Δεν βρέθηκε η εργασία.[/red]")
+            console.print("[red]Wrong ID. Task not found.[/red]")
     except ValueError:
-        console.print("[red]Παρακαλώ δώσε έναν έγκυρο αριθμό (ID).[/red]")
+        console.print("[red]Please enter a valid ID number.[/red]")
 
 
 def clear():
@@ -146,43 +143,43 @@ init_db()
 
 while True:
     console.print("\n[bold blue]=== MENU ===[/bold blue]")
-    console.print("1. 📋 Προβολή εργασιών")
-    console.print("2. ➕ Προσθήκη εργασίας")
-    console.print("3. ✔ Ολοκλήρωση εργασίας (με ID)")
-    console.print("4. 🗑 Διαγραφή εργασίας (με ID)")
-    console.print("5. 🧼 Καθαρισμός Terminal")
-    console.print("6. 🔍 Προβολή εκρεμής εργασιών")
-    console.print("[red]7. 🧹Διαγραφή όλλων[/red]")
-    console.print("[red]8. 🚪 Έξοδος[/red]")
+    console.print("1. 📋 View tasks")
+    console.print("2. ➕ Add task")
+    console.print("3. ✔ Complete task (by ID)")
+    console.print("4. 🗑 Delete task (by ID)")
+    console.print("5. 🧼 Clear Terminal")
+    console.print("6. 🔍 View pending tasks")
+    console.print("[red]7. 🧹 Delete all[/red]")
+    console.print("[red]8. 🚪 Exit[/red]")
 
-    select = input("\nΕπιλογή: ").strip()
+    select = input("\nSelect option: ").strip()
 
     if select == "8":
-        console.print("[bold yellow]Αντίο![/bold yellow]")
+        console.print("[bold yellow]Goodbye![/bold yellow]")
         break
     elif select == "7":
         clear_all_tasks()
     elif select == "1":
         show_tasks()
     elif select == "2":
-        title = input("Τίτλος εργασίας: ")
-        priority = input("Προτεραιότητα (1=Χαμηλή, 2=Μεσαία, 3=Υψηλή): ")
+        title = input("Task title: ")
+        priority = input("Priority (1=Low, 2=Medium, 3=High): ")
 
         if title.strip():
-            create_task(title,priority)
+            create_task(title, priority)
         else:
-            console.print("[red]Ο τίτλος δεν μπορεί να είναι κενός![/red]")
+            console.print("[red]Title cannot be empty![/red]")
     elif select == "3":
         show_tasks()
-        task_id = input("Δώσε το ID της εργασίας που ολοκλήρωσες: ")
+        task_id = input("Enter the ID of the task you completed: ")
         complete_task(task_id)
     elif select == "4":
         show_tasks()
-        task_id = input("Δώσε το ID της εργασίας για διαγραφή: ")
+        task_id = input("Enter the ID of the task to delete: ")
         delete_task(task_id)
     elif select == "5":
         clear()
     elif select == "6":
         show_uncompleted_tasks()
     else:
-        console.print("[red]Μη έγκυρη επιλογή![/red]")
+        console.print("[red]Invalid option![/red]")
