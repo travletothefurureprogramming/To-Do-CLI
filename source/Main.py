@@ -1,116 +1,176 @@
 import json
-from rich.console import Console
 import os
+from rich.console import Console
+from rich.table import Table  
+import datetime
 
 console = Console()
+DB_FILE = "to_do.json"
 
-if os.path.exists("to_do.json"):
-    pass
-else:
-    f = open("to_do.json",'w')
-    f.write("[" \
-    "]")
-    f.close()
+
+def init_db():
+    if not os.path.exists(DB_FILE) or os.path.getsize(DB_FILE) == 0:
+        with open(DB_FILE, "w", encoding="utf-8") as f:
+            json.dump([], f)
+
+
+def load_tasks():
+    init_db()
+    try:
+        with open(DB_FILE, "r", encoding="utf-8") as file:
+            return json.load(file)
+    except json.JSONDecodeError:
+        return []
+
+
+def save_tasks(tasks):
+    with open(DB_FILE, "w", encoding="utf-8") as file:
+        json.dump(tasks, file, indent=4, ensure_ascii=False)
+
 
 def show_tasks():
-    with open("to_do.json", "r") as file:
-        tasks = json.load(file)  
-    return tasks  
+    tasks = load_tasks()
+
+    if not tasks:
+        console.print("[yellow]Δεν υπάρχουν εργασίες στη λίστα![/yellow]")
+        return
+
+    table = Table(title="📋 Η To-Do Λίστα Μου", title_style="bold magenta")
+    table.add_column("ID", justify="center", style="cyan", no_wrap=True)
+    table.add_column("Τίτλος", style="white")
+    table.add_column("Κατάσταση", justify="center")
+    table.add_column("Ημερομηνία", justify="center")
+
+
+    for idx, task in enumerate(tasks, start=1):
+        status = (
+            "[green]✔ Ολοκληρώθηκε[/green]"
+            if task["status"] == "complete"
+            else "[red]❌ Εκκρεμεί[/red]"
+        )
+        table.add_row(str(idx), task["title"], status, task["datetime"])
+
+    console.print(table)
+
+
+def show_uncompleted_tasks():
+    count = 0
+    tasks = load_tasks()
+
+    if not tasks:
+        console.print("[yellow]Δεν υπάρχουν εργασίες στη λίστα![/yellow]")
+        return
+
+    table = Table(title="📋 Η To-Do Λίστα Μου", title_style="bold magenta")
+    table.add_column("ID", justify="center", style="cyan", no_wrap=True)
+    table.add_column("Τίτλος", style="white")
+    table.add_column("Κατάσταση", justify="center")
+    table.add_column("Ημερομηνία", justify="center")
+    
+
+    for idx, task in enumerate(tasks, start=1):
+        if task["status"] != "complete":
+         table.add_row(str(idx), task["title"], "✔ Ολοκληρώθηκε", task["datetime"])
+         count +=1
+    
+    if count > 1:
+     console.print(table)
+    else:
+      console.print("[green]Όλλες οι εργασίες έχουν ολοκληρωθεί![/green]")
+
+def clear_all_tasks():
+    with open("to_do.json","w",encoding="utf-8") as f:
+            json.dump([], f)
+    
+    console.print(
+                f"[green]Όλλες οι εργασίες έχουν διαγραφεί![/green]"
+            )
+
 
 def create_task(title):
-    with open("to_do.json", "r") as file:
-        current_data = json.load(file)
+    tasks = load_tasks()
+    tasks.append({"title": title, "status": "uncomplete", "datetime":datetime.datetime.now().strftime("%Y-%m-%d %H:%M")})
+    save_tasks(tasks)
+    console.print(
+        f"[green]✔ Η εργασία '{title}' δημιουργήθηκε με επιτυχία![/green]"
+    )
 
-    data = {
-        "title": title,
-        "status": "uncomplete"  
-    }
 
-    current_data.append(data)
-
-    with open("to_do.json", "w") as file:
-        json.dump(current_data, file, indent=4) 
-
-def delete_task(title):
+def complete_task(task_id):
+    tasks = load_tasks()
     try:
-        with open("to_do.json", "r") as file:
-            current_data = json.load(file)
-    except (json.JSONDecodeError, FileNotFoundError):
-        console.print("[red]Error: No tasks found![/red]")
-        return
-
-    new_data = [task for task in current_data if task["title"] != title]
-
-    if len(new_data) < len(current_data):
-        with open("to_do.json", "w") as file:
-            json.dump(new_data, file, indent=4)
-        console.print(f"[green]Task '{title}' deleted successfully![/green]")
-    else:
-        console.print(f"[yellow]Task '{title}' not found.[/yellow]")
+        idx = int(task_id) - 1
+        if 0 <= idx < len(tasks):
+            tasks[idx]["status"] = "complete"
+            save_tasks(tasks)
+            console.print(
+                f"[green]✔ Η εργασία '{tasks[idx]['title']}' ολοκληρώθηκε![/green]"
+            )
+        else:
+            console.print("[red]Λάθος ID. Δεν βρέθηκε η εργασία.[/red]")
+    except ValueError:
+        console.print("[red]Παρακαλώ δώσε έναν έγκυρο αριθμό (ID).[/red]")
 
 
-def complete_task(title):
+def delete_task(task_id):
+    tasks = load_tasks()
     try:
-        with open("to_do.json", "r") as file:
-            current_data = json.load(file)
-    except (json.JSONDecodeError, FileNotFoundError):
-        console.print("[red]Error: No tasks found or file is empty![/red]")
-        return
+        idx = int(task_id) - 1
+        if 0 <= idx < len(tasks):
+            removed = tasks.pop(idx)
+            save_tasks(tasks)
+            console.print(
+                f"[green]🗑 Η εργασία '{removed['title']}' διαγράφηκε![/green]"
+            )
+        else:
+            console.print("[red]Λάθος ID. Δεν βρέθηκε η εργασία.[/red]")
+    except ValueError:
+        console.print("[red]Παρακαλώ δώσε έναν έγκυρο αριθμό (ID).[/red]")
 
-    task_found = False
-    
-    for data in current_data:
-        if data["title"] == title:  
-            data["status"] = "complete"  
-            task_found = True
-            break  
-
-    if task_found:
-        with open("to_do.json", "w") as file:
-            json.dump(current_data, file, indent=4)
-        console.print(f"[green]Task '{title}' marked as complete![/green]")
-    else:
-        console.print(f"[yellow]Task '{title}' not found.[/yellow]")
 
 def clear():
-    os.system('cls' if os.name == 'nt' else 'clear')   
+    os.system("cls" if os.name == "nt" else "clear")
+
+
+init_db()
 
 while True:
-    console.print("\n[underline]1. Show tasks[/underline]")
-    console.print("[underline]2. Create task[/underline]")
-    console.print("[underline]3. Complete task[/underline]")
-    console.print("[red underline]4. Delete task[/red underline]")
-    console.print("[red underline]5. Clear Terminal[/red underline]")
-    console.print("[red underline]6. Exit[/red underline]")
+    console.print("\n[bold blue]=== MENU ===[/bold blue]")
+    console.print("1. 📋 Προβολή εργασιών")
+    console.print("2. ➕ Προσθήκη εργασίας")
+    console.print("3. ✔ Ολοκλήρωση εργασίας (με ID)")
+    console.print("4. 🗑 Διαγραφή εργασίας (με ID)")
+    console.print("5. 🧼 Καθαρισμός Terminal")
+    console.print("6. 🔍 Προβολή εκρεμής εργασιών")
+    console.print("[red]7. 🧹Διαγραφή όλλων[/red]")
+    console.print("[red]8. 🚪 Έξοδος[/red]")
 
-    select = input("Select number: ")
+    select = input("\nΕπιλογή: ").strip()
 
-    if select == "6":
-        exit()
-        
+    if select == "8":
+        console.print("[bold yellow]Αντίο![/bold yellow]")
+        break
+    if select == "7":
+        clear_all_tasks()
     elif select == "1":
-        tasks = show_tasks()
-        
-        for task in tasks: 
-            console.print(f"Title: {task['title']}")
-            if task['status'] == "complete":
-                console.print("[green]Completed[/green]")
-            else:
-                console.print("[red]Uncompleted[/red]") 
-
+        show_tasks()
     elif select == "2":
-        title = input("Enter title: ")
-        create_task(title)
-        console.print("[green]Task created successfully![/green]")
-    
+        title = input("Τίτλος εργασίας: ")
+        if title.strip():
+            create_task(title)
+        else:
+            console.print("[red]Ο τίτλος δεν μπορεί να είναι κενός![/red]")
     elif select == "3":
-        title = input("Enter title: ")
-        complete_task(title)
-
+        show_tasks()
+        task_id = input("Δώσε το ID της εργασίας που ολοκλήρωσες: ")
+        complete_task(task_id)
     elif select == "4":
-        title = input("Enter title: ")
-        delete_task(title)
-    
+        show_tasks()
+        task_id = input("Δώσε το ID της εργασίας για διαγραφή: ")
+        delete_task(task_id)
     elif select == "5":
         clear()
-
+    elif select == "6":
+        show_uncompleted_tasks()
+    else:
+        console.print("[red]Μη έγκυρη επιλογή![/red]")
