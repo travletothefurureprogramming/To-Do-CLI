@@ -40,6 +40,8 @@ def show_tasks():
     table.add_column("Τίτλος", style="white")
     table.add_column("Κατάσταση", justify="center")
     table.add_column("Ημερομηνία", justify="center")
+    table.add_column("Προτεραιότητα", justify="center")
+
 
 
     for idx, task in enumerate(tasks, start=1):
@@ -48,7 +50,7 @@ def show_tasks():
             if task["status"] == "complete"
             else "[red]❌ Εκκρεμεί[/red]"
         )
-        table.add_row(str(idx), task["title"], status, task["datetime"])
+        table.add_row(str(idx), task["title"], status, task["datetime"],task["priority"])
 
     console.print(table)
 
@@ -66,14 +68,16 @@ def show_uncompleted_tasks():
     table.add_column("Τίτλος", style="white")
     table.add_column("Κατάσταση", justify="center")
     table.add_column("Ημερομηνία", justify="center")
+    table.add_column("Προτεραιότητα", justify="center")
+
     
 
     for idx, task in enumerate(tasks, start=1):
         if task["status"] != "complete":
-         table.add_row(str(idx), task["title"], "✔ Ολοκληρώθηκε", task["datetime"])
+         table.add_row(str(idx), task["title"], "[red]❌ Εκκρεμεί[/red]", task["datetime"], task["priority"])
          count +=1
     
-    if count > 1:
+    if count >= 1:
      console.print(table)
     else:
       console.print("[green]Όλλες οι εργασίες έχουν ολοκληρωθεί![/green]")
@@ -87,9 +91,15 @@ def clear_all_tasks():
             )
 
 
-def create_task(title):
+def create_task(title,priority):
     tasks = load_tasks()
-    tasks.append({"title": title, "status": "uncomplete", "datetime":datetime.datetime.now().strftime("%Y-%m-%d %H:%M")})
+    if priority == "1":
+     priority = "Χαμηλή"
+    elif priority == "2":
+     priority = "Μέτρια"
+    elif priority == "3":
+     priority = "Υψηλή"
+    tasks.append({"title": title, "status": "uncomplete", "datetime":datetime.datetime.now().strftime("%Y-%m-%d %H:%M"),"priority":priority})
     save_tasks(tasks)
     console.print(
         f"[green]✔ Η εργασία '{title}' δημιουργήθηκε με επιτυχία![/green]"
@@ -150,14 +160,16 @@ while True:
     if select == "8":
         console.print("[bold yellow]Αντίο![/bold yellow]")
         break
-    if select == "7":
+    elif select == "7":
         clear_all_tasks()
     elif select == "1":
         show_tasks()
     elif select == "2":
         title = input("Τίτλος εργασίας: ")
+        priority = input("Προτεραιότητα (1=Χαμηλή, 2=Μεσαία, 3=Υψηλή): ")
+
         if title.strip():
-            create_task(title)
+            create_task(title,priority)
         else:
             console.print("[red]Ο τίτλος δεν μπορεί να είναι κενός![/red]")
     elif select == "3":
