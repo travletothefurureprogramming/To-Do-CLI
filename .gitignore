@@ -1,1 +1,4 @@
 /build
+/source/build
+/source/.vscode
+*.json

@@ -3,15 +3,24 @@ import os
 from rich.console import Console
 from rich.table import Table  
 import datetime
+import questionary
 
 console = Console()
 DB_FILE = "to_do.json"
+SETTINGS_FILE = "settings.json"
 
 
 def init_db():
     if not os.path.exists(DB_FILE) or os.path.getsize(DB_FILE) == 0:
         with open(DB_FILE, "w", encoding="utf-8") as f:
             json.dump([], f)
+
+
+def init_settings():
+    if not os.path.exists(SETTINGS_FILE) or os.path.getsize(SETTINGS_FILE) == 0:
+        with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
+            json.dump({"labels": []}, f, indent=4)
+
 
 
 def load_tasks():
@@ -22,10 +31,22 @@ def load_tasks():
     except json.JSONDecodeError:
         return []
 
+def load_settings():
+    init_settings()
+    try:
+        with open(SETTINGS_FILE, "r", encoding="utf-8") as file:
+            return json.load(file)
+    except json.JSONDecodeError:
+        return []
+
 
 def save_tasks(tasks):
     with open(DB_FILE, "w", encoding="utf-8") as file:
         json.dump(tasks, file, indent=4, ensure_ascii=False)
+
+def save_settings(label):
+    with open(SETTINGS_FILE, "w", encoding="utf-8") as file:
+        json.dump(label, file, indent=4, ensure_ascii=False)
 
 
 def show_tasks():
@@ -38,6 +59,7 @@ def show_tasks():
     table = Table(title="📋 My To-Do List", title_style="bold magenta")
     table.add_column("ID", justify="center", style="cyan", no_wrap=True)
     table.add_column("Title", style="white")
+    table.add_column("Label", style="white")
     table.add_column("Status", justify="center")
     table.add_column("Date", justify="center")
     table.add_column("Priority", justify="center")
@@ -48,7 +70,7 @@ def show_tasks():
             if task["status"] == "complete"
             else "[red]❌ Pending[/red]"
         )
-        table.add_row(str(idx), task["title"], status, task["datetime"], task["priority"])
+        table.add_row(str(idx), task["title"],task["label"],status, task["datetime"], task["priority"])
 
     console.print(table)
 
@@ -64,13 +86,14 @@ def show_uncompleted_tasks():
     table = Table(title="📋 My To-Do List", title_style="bold magenta")
     table.add_column("ID", justify="center", style="cyan", no_wrap=True)
     table.add_column("Title", style="white")
+    table.add_column("Label", style="white")
     table.add_column("Status", justify="center")
     table.add_column("Date", justify="center")
     table.add_column("Priority", justify="center")
 
     for idx, task in enumerate(tasks, start=1):
         if task["status"] != "complete":
-            table.add_row(str(idx), task["title"], "[red]❌ Pending[/red]", task["datetime"], task["priority"])
+            table.add_row(str(idx), task["title"],task["label"],"[red]❌ Pending[/red]", task["datetime"], task["priority"])
             count += 1
     
     if count >= 1:
@@ -88,20 +111,39 @@ def clear_all_tasks():
     )
 
 
-def create_task(title, priority):
+def create_task(title,label,priority):
     tasks = load_tasks()
-    if priority == "1":
-        priority = "Low"
-    elif priority == "2":
-        priority = "Medium"
-    elif priority == "3":
-        priority = "High"
-    tasks.append({"title": title, "status": "uncomplete", "datetime": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"), "priority": priority})
+    tasks.append({"title": title,"label": label,"status": "uncomplete", "datetime": datetime.datetime.now().strftime("%Y-%m-%d %H:%M"), "priority": priority})
     save_tasks(tasks)
     console.print(
         f"[green]✔ Task '{title}' was created successfully![/green]"
     )
 
+def filter_tasks(label):
+    count = 0
+    tasks = load_tasks()
+
+    if not tasks:
+        console.print("[yellow]There are no tasks in the list![/yellow]")
+        return
+
+    table = Table(title="📋 My To-Do List", title_style="bold magenta")
+    table.add_column("ID", justify="center", style="cyan", no_wrap=True)
+    table.add_column("Title", style="white")
+    table.add_column("Label", style="white")
+    table.add_column("Status", justify="center")
+    table.add_column("Date", justify="center")
+    table.add_column("Priority", justify="center")
+
+    for idx, task in enumerate(tasks, start=1):
+        if task["label"] == label:
+            table.add_row(str(idx), task["title"],task["label"],"[red]❌ Pending[/red]", task["datetime"], task["priority"])
+            count += 1
+    
+    if count >= 1:
+        console.print(table)
+    else:
+        pass
 
 def complete_task(task_id):
     tasks = load_tasks()
@@ -138,8 +180,20 @@ def delete_task(task_id):
 def clear():
     os.system("cls" if os.name == "nt" else "clear")
 
+def create_label(label):
+    labels = load_settings()
+
+    labels["labels"].append(label)
+
+    save_settings(labels)
+
+def get_labbels():
+    labels = load_settings()
+    return labels["labels"]
+
 
 init_db()
+init_settings()
 
 while True:
     console.print("\n[bold blue]=== MENU ===[/bold blue]")
@@ -147,26 +201,35 @@ while True:
     console.print("2. ➕ Add task")
     console.print("3. ✔ Complete task (by ID)")
     console.print("4. 🗑 Delete task (by ID)")
-    console.print("5. 🧼 Clear Terminal")
-    console.print("6. 🔍 View pending tasks")
-    console.print("[red]7. 🧹 Delete all[/red]")
-    console.print("[red]8. 🚪 Exit[/red]")
+    console.print("5. ➕ Create Label")
+    console.print("6. 🧼 Clear Terminal")
+    console.print("7. 🔍 View pending tasks")
+    console.print("8. 📌 Filter tasks based on label")
+    console.print("[red]9. 🧹 Delete all[/red]")
+    console.print("[red]10. 🚪 Exit[/red]")
 
     select = input("\nSelect option: ").strip()
 
-    if select == "8":
+    if select == "10":
         console.print("[bold yellow]Goodbye![/bold yellow]")
         break
-    elif select == "7":
+    elif select == "9":
         clear_all_tasks()
     elif select == "1":
         show_tasks()
     elif select == "2":
         title = input("Task title: ")
-        priority = input("Priority (1=Low, 2=Medium, 3=High): ")
+        
+        priority = questionary.select("Select Priority Level:",
+                                      choices=["Low", "Medium", "High"]).ask()
+        
+        label = questionary.select(
+            "Select label",
+            choices=get_labbels(),
+        ).ask()
 
         if title.strip():
-            create_task(title, priority)
+            create_task(title, label, priority)
         else:
             console.print("[red]Title cannot be empty![/red]")
     elif select == "3":
@@ -178,8 +241,20 @@ while True:
         task_id = input("Enter the ID of the task to delete: ")
         delete_task(task_id)
     elif select == "5":
-        clear()
+        label_name = input("Enter label name: ")
+        if label_name in get_labbels():
+            console.print("[yellow]Label already exists![/yellow]")
+        else:
+            create_label(label_name)
     elif select == "6":
+        clear()
+    elif select == "7":
         show_uncompleted_tasks()
+    elif select == "8":
+        label = questionary.select(
+            "Select label",
+            choices=get_labbels(),
+        ).ask()
+        filter_tasks(label)
     else:
         console.print("[red]Invalid option![/red]")
