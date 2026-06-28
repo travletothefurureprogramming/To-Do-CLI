@@ -5,7 +5,7 @@ A minimalist, file-based command-line todo manager designed for developers who w
 
 ## Install
 
-Go to [https://github.com/travletothefurureprogramming/To-Do-CLI/releases/tag/Release](https://github.com/travletothefurureprogramming/To-Do-CLI/releases/tag/Release) and download the .exe
+Go to [https://github.com/travletothefurureprogramming/To-Do-CLI/releases/tag/Release](https://github.com/travletothefurureprogramming/To-Do-CLI/releases/tag/Release_3)) and download the .exe
 
 ## How to run
 
@@ -15,6 +15,6 @@ Open the .exe and you are ready to go!!!
 
 Here is the tool in action, showing how to view, add, and complete tasks seamlessly:
 
-<img width="1492" height="755" alt="Screenshot 2026-06-06 153448" src="https://github.com/user-attachments/assets/d75b8b54-3bf3-410a-91db-3c563c498e4c" />
+<img width="386" height="246" alt="Screenshot 2026-06-28 114331" src="https://github.com/user-attachments/assets/d5c523fe-8e6d-4ae4-80fb-e8834bdefda7" />
 
 Find live demo [here](https://stardance.hackclub.com/projects/9648/devlogs/2976)
