@@ -37,7 +37,7 @@ def load_settings():
         with open(SETTINGS_FILE, "r", encoding="utf-8") as file:
             return json.load(file)
     except json.JSONDecodeError:
-        return []
+            return {"labels": []}
 
 
 def save_tasks(tasks):
@@ -218,14 +218,22 @@ while True:
     elif select == "1":
         show_tasks()
     elif select == "2":
+        labels = get_labbels()
+
+        if not labels:
+            console.print("[red]No labels available. Create a label first![/red]")
+            continue
+
         title = input("Task title: ")
-        
-        priority = questionary.select("Select Priority Level:",
-                                      choices=["Low", "Medium", "High"]).ask()
-        
+
+        priority = questionary.select(
+            "Select Priority Level:",
+            choices=["Low", "Medium", "High"]
+        ).ask()
+
         label = questionary.select(
             "Select label",
-            choices=get_labbels(),
+            choices=labels,
         ).ask()
 
         if title.strip():
@@ -251,10 +259,17 @@ while True:
     elif select == "7":
         show_uncompleted_tasks()
     elif select == "8":
+        labels = get_labbels()
+
+        if not labels:
+            console.print("[red]No labels available![/red]")
+            continue
+
         label = questionary.select(
             "Select label",
-            choices=get_labbels(),
+            choices=labels,
         ).ask()
+
         filter_tasks(label)
     else:
         console.print("[red]Invalid option![/red]")
